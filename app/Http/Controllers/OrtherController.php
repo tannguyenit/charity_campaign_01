@@ -89,4 +89,11 @@ class OrtherController extends Controller
             action('CampaignController@index')
         )->with(['alert-success' => trans('index.contact_success')]);
     }
+
+    public function createBlog()
+    {
+        $this->dataJson['validateMessage'] = json_encode(trans('blog.validate'));
+
+        return view('orther.createBlog', $this->dataJson);
+    }
 }
