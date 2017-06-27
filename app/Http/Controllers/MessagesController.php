@@ -116,7 +116,7 @@ class MessagesController extends BaseController
                     'avatar' => $currentUser->avatar,
                     'name' => $currentUser->name,
                     'thread_id' => $request->thread_id,
-                    'user_id' => auth()->id(),
+                    'user_id' => $request->target_id,
                 ];
                 $messageSendHtml = view('messenger.message_send', $dataLayout)->render();
                 $messageReceiveHtml = view('messenger.message_receive', $dataLayout)->render();
@@ -152,5 +152,18 @@ class MessagesController extends BaseController
     public function update($id)
     {
         //
+    }
+
+    public function searchUser(Request $request)
+    {
+        $listFriend = $this->participantRepository->listUser();
+        $arrId = [];
+        foreach ($listFriend as $value) {
+            $arrId[] = $value->user_id;
+        }
+
+        $result = $this->followRepository->searchUserFollowing($request->get('q'), $arrId);
+
+        return response()->json($result);
     }
 }

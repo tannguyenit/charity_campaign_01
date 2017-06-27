@@ -1,4 +1,4 @@
-<li class="person"
+<li class="person new person_{{ $thread_id }}"
     data-chat="person_{{ $thread_id }}"
     data-url="{{ action('MessagesController@show', $thread_id) }}"
     data-thread="{{ $thread_id }}"

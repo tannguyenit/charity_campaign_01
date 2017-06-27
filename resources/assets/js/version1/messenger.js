@@ -31,8 +31,8 @@ equalheight = function(container){
         }
     });
 }
-$('.left .person').mousedown(function() {
 
+$(document).on('click', '.left .person, .tt-dataset .person', function() {
     if ($(this).hasClass('active')) {
 
         return false;
@@ -51,12 +51,19 @@ $('.left .person').mousedown(function() {
             },
             success: function(data) {
                 if (data.success) {
-                    _self.addClass('active');
+
+                    _self.addClass('active person_' + data.thread_id);
                     _self.removeClass('new-chat');
                     _self.attr('data-url', data.url);
                     _self.attr('data-thread', data.thread_id);
                     _self.attr('data-chat', 'person_' + data.thread_id);
                     $('.right .top .name').html(personName)
+
+                    if (_self.parent().hasClass('tt-dataset')) {
+                        var html = _self[0].outerHTML;
+                        $('.people').prepend(html);
+                        $('#search_user').val('');
+                    }
                     $('.chat').addClass('active-chat');
                     $('.chat').attr('data-chat-id', 'person_' + data.thread_id);
                     $('.text-body').focus();
@@ -84,8 +91,7 @@ $('.left .person').mousedown(function() {
             updateScrollbar();
         });
     }
-});
-
+})
 $(window).on('keydown', function(e) {
 
     if (e.which == 13) {
@@ -144,11 +150,8 @@ socket.on('chat', function (data) {
                 $('.active-chat').append(data.html);
                 updateScrollbar();
             } else {
-                if ($('.people').find('.'+data.chatId)) {
-                    $('.people').find('.'+data.chatId).find('.preview-message').html(data.preview)
-                } else if (meId == data.target_id) {
-                    $('.people').append(data.new_user_preview)
-                }
+                $('.people').find('.'+data.chatId).remove();
+                $('.people').prepend(data.new_user_preview);
             }
         }
     }

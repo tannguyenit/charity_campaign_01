@@ -49,8 +49,7 @@ siteorigin-panels siteorigin-panels-home group-blog loading thim_header_custom_s
     <div class="container">
         <div class="left col-xs-4 no-padding fix-height">
             <div class="top">
-                <input type="text" class="col-xs-9" />
-                <a href="javascript:;" class="search col-xs-9"></a>
+                {!! Form::text('search', null, ['class' => 'col-xs-12', 'id' => 'search_user']) !!}
             </div>
             <ul class="people list-unstyled">
                 @if (isset($listFriend))
@@ -107,6 +106,13 @@ siteorigin-panels siteorigin-panels-home group-blog loading thim_header_custom_s
     {{ Html::script('js/multiple_language.js') }}
     {{ Html::script('https://cdn.socket.io/socket.io-1.3.4.js') }}
     {{ Html::script('js/version1/messenger.js') }}
+    {{ Html::script('js/version1/searchUser.js') }}
+    <script type="text/javascript">
+        jQuery(document).ready(function($) {
+            var search = new Search();
+            search.init();
+        });
+    </script>
 @show
 </body>
 </html>
