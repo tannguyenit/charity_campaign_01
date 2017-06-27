@@ -102,6 +102,8 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::post('follow/user', 'FollowController@followOrUnFollowUser');
 
+    Route::get('messages/search', 'MessagesController@searchUser');
+
     Route::resource('messages', 'MessagesController');
 
     Route::resource('participant', 'ParticipantController');
