@@ -7,6 +7,7 @@ return [
         'error' => 'Register account error',
     ],
     'title' => 'Manage User',
+    'chat' => 'Send Messenger',
     'name' => 'Name',
     'email' => 'E-Mail Address',
     'password' => 'Password',

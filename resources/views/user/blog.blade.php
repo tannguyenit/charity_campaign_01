@@ -82,7 +82,7 @@
                                                                 <div class="caret-inner"></div>
                                                             </div>
                                                             <ul tabindex="-1" role="menu" class="no-margin-left no-margin-right" aria-labelledby="menu-0" aria-hidden="true">
-                                                                <li class="embed-link js-actionEmbedTweet" data-nav="embed_tweet" role="presentation">
+                                                                <li class="embed-link js-actionEmbedTweet text-center" data-nav="embed_tweet" role="presentation">
                                                                     <a href="{{ action('OrtherController@blog') }}" class="dropdown-link" title="">{{ trans('user.manager.view') }}</a>
                                                                 </li>
                                                                 <li class="embed-link text-center" data-nav="embed_tweet" role="presentation">

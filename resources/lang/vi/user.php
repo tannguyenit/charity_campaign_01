@@ -6,6 +6,7 @@ return [
         'success' => 'Đăng ký tài khoản thành công',
         'error' => 'Đăng ký tài khoản lỗi',
     ],
+    'chat' => 'Gửi tin nhắn',
     'name' => 'Tên',
     'title' => 'Quản lý người dùng',
     'email' => 'Địa chỉ email',

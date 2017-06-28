@@ -35,7 +35,7 @@ abstract class BaseRepository
         return $this->model = $model;
     }
 
-    public function getCurrentUser()
+    public static function getCurrentUser()
     {
         return Auth::user();
     }

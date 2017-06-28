@@ -92,16 +92,16 @@
                                                                 <div class="caret-inner"></div>
                                                             </div>
                                                             <ul tabindex="-1" role="menu" class="no-margin-left no-margin-right" aria-labelledby="menu-0" aria-hidden="true">
-                                                                <li class="embed-link js-actionEmbedTweet" data-nav="embed_tweet" role="presentation">
+                                                                <li class="embed-link js-actionEmbedTweet text-center" data-nav="embed_tweet" role="presentation">
                                                                     <a href="{{ action('CampaignController@show', $campaign->id) }}" class="dropdown-link" title="">{{ trans('user.manager.view') }}</a>
                                                                 </li>
                                                                 <li class="dropdown-divider" role="presentation"></li>
-                                                                <li class="js-actionMomentMakerCreateMoment" role="presentation">
+                                                                <li class="js-actionMomentMakerCreateMoment text-center" role="presentation">
                                                                     <div data-campaign-id="{{ $campaign->id }}">
                                                                         @if (!$campaign->status)
-                                                                            <button type="submit" class="dropdown-link active-campaign" role="menuitem">{{ trans('campaign.active') }}</button>
+                                                                            <button type="submit" class="dropdown-link active-campaign text-center" role="menuitem">{{ trans('campaign.active') }}</button>
                                                                         @else
-                                                                            <button type="submit" class="dropdown-link active-campaign" role="menuitem">{{ trans('campaign.close') }}</button>
+                                                                            <button type="submit" class="dropdown-link active-campaign text-center" role="menuitem">{{ trans('campaign.close') }}</button>
                                                                         @endif
                                                                     </div>
                                                                 </li>
