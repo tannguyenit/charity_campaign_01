@@ -14,7 +14,7 @@ class AddFieldsToUsersTable extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('phone_number', 20)->nullable();
+            $table->text('phone_number', 20)->nullable();
             $table->tinyInteger('role')->default(0);
         });
     }
