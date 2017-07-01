@@ -22,7 +22,7 @@ class EditThreadsTable extends Migration
     public function down()
     {
         Schema::table('threads', function (Blueprint $table) {
-            $table->string('subject')->nullable()->change();
+            $table->string('subject')->change();
         });
     }
 }
