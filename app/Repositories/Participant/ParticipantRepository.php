@@ -17,16 +17,20 @@ class ParticipantRepository extends BaseRepository implements ParticipantReposit
 
         $friend = $this->model->where('user_id', auth()->id())->get();
         $thread = [];
-dd($friend);
-        foreach ($friend as $value) {
-            $thread[] = $value->thread_id;
-        }
+        
+        if($thread) {
+            foreach ($friend as $value) {
+                    $thread[] = $value->thread_id;
+                }
 
-        return $this->model->with('user')
-            ->whereIn('thread_id', $thread)
-            ->groupBy('user_id')
-            ->where('user_id', '<>', auth()->id())
-            ->orderBy('updated_at', 'DESC')
-            ->get();
+            return $this->model->with('user')
+                ->whereIn('thread_id', $thread)
+                ->groupBy('user_id')
+                ->where('user_id', '<>', auth()->id())
+                ->orderBy('updated_at', 'DESC')
+                ->get();
+        }
+        return false;
+        
     }
 }
