@@ -17,7 +17,7 @@ class ParticipantRepository extends BaseRepository implements ParticipantReposit
 
         $friend = $this->model->where('user_id', auth()->id())->get();
         $thread = [];
-
+dd($friend);
         foreach ($friend as $value) {
             $thread[] = $value->thread_id;
         }
