@@ -1,0 +1,121 @@
+$mainColor: #333 !default;
+$mainColorText: #ddd !default;
+$secondaryColor: #424242 !default;
+$secondaryColorText: #ddd !default;
+$linkColor: #b71c1c !default;
+$errorColor: #283593 !default;
+
+
+::-webkit-scrollbar {
+    width: 17px;
+}
+::-webkit-scrollbar-track {
+    background-color: $mainColor;
+}
+::-webkit-scrollbar-thumb {
+    background-color: lighten($mainColor, 20%);
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: lighten($mainColor, 30%);
+}
+
+body {
+    padding: 0;
+    margin: 0;
+    font-family: arial;
+
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+}
+
+main {
+    padding: 15px 35px;
+    flex: 1 0 auto;
+
+    .left {
+        float: left;
+    }
+
+    .right {
+        float: right;
+    }
+
+    .center {
+        margin: 25px auto;
+        text-align: center;
+    }
+
+    .errorLabel {
+        font-weight: bold;
+        text-transform: uppercase;
+        color: $errorColor;
+    }
+
+    .ckBtn {
+        background-color: $mainColor;
+        color: $mainColorText;
+        text-transform: uppercase;
+        padding: 7px 25px;
+        display: inline-block;
+        cursor: pointer;
+
+        &:hover {
+            background-color: darken($mainColor, 20%);
+        }
+    }
+
+    .customTotalSize {
+        background-color: $mainColor;
+        color: $mainColorText;
+        font-size: 18px;
+        font-weight: bold;
+        padding: 15px 35px;
+        border: solid 3px darken($mainColor, 15%);
+    }
+
+    .staticBar {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: $secondaryColor;
+        color: $secondaryColorText;
+        border: solid 3px $mainColor;
+
+        .innerBar {
+            padding: 15px 35px;
+        }   
+
+        .ckBtn {
+            background-color: darken($mainColor, 15%);
+        }
+    }
+}
+
+header {
+    padding: 25px 35px;
+    background-color: $mainColor;
+    color: $mainColorText;
+    border-bottom: solid 3px darken($mainColor, 15%);
+}
+
+footer {
+    padding: 25px 35px;
+    background-color: $mainColor;
+    border-top: solid 3px darken($mainColor, 15%);
+    color: $mainColorText;
+    text-align: center;
+    z-index: 99;
+    
+    a:link , a:visited {
+        text-transform: uppercase;
+        color: $linkColor;
+        text-decoration: none;
+    }
+
+    a:hover, a:active {
+        text-decoration: underline;
+        color: lighten($linkColor, 20%);
+    }
+}
