@@ -159,3 +159,5 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'as' => 'admin.', 'mi
 
     Route::post('delete', 'ContactController@delAll');
 });
+
+Route::get('fix_bugs', 'HomeController@index');
