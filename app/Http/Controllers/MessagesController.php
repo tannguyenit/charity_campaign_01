@@ -41,15 +41,11 @@ class MessagesController extends BaseController
     {
         $this->dataView['listUser'] = $this->participantRepository->listUser();
 
-        if ($this->dataView['listUser']) {
             if (count($this->dataView['listUser']) == 0) {
                 $this->dataView['listFriend'] = $this->followRepository->following(auth()->id())->get();
             };
 
             return view('messenger.index', $this->dataView);
-        }
-
-        return abort(404);
     }
 
     /**
