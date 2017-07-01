@@ -35,7 +35,7 @@ abstract class BaseRepository
         return $this->model = $model;
     }
 
-    public function getCurrentUser()
+    public static function getCurrentUser()
     {
         return Auth::user();
     }
@@ -64,6 +64,13 @@ abstract class BaseRepository
     public function findBy($column, $option)
     {
         $data = $this->model->where($column, $option)->get();
+
+        return $data;
+    }
+
+    public function whereIn($column, $array)
+    {
+        $data = $this->model->whereIn($column, $array);
 
         return $data;
     }

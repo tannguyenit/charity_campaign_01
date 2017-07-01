@@ -3,6 +3,7 @@
 namespace App\Repositories\User;
 
 use App\Models\Campaign;
+use App\Models\Relationship;
 use App\Models\SocialAccount;
 use App\Models\User;
 use App\Repositories\BaseRepository;
@@ -107,6 +108,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
             if (empty($user)) {
                 $user = $this->model->create([
                     'name' => $providerUser->getName(),
+                    'fullname' => $providerUser->getName(),
                     'email' => $providerUser->getEmail(),
                     'avatar' => $providerUser->getAvatar(),
                     'is_active' => config('constants.ACTIVATED'),
@@ -131,6 +133,13 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         } else {
             $avatar = $this->uploadImage($inputs['avatar'], config('path.to_avatar'));
             $inputs['avatar'] = $avatar;
+        }
+
+        if (empty($inputs['cover'])) {
+            unset($inputs['cover']);
+        } else {
+            $cover = $this->uploadImage($inputs['cover'], config('path.images'));
+            $inputs['cover'] = $cover;
         }
 
         DB::beginTransaction();
@@ -170,8 +179,35 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
 
     public function getUserByRating()
     {
-        return $this->model->orderBy('star', 'desc')
-            ->take(config('constants.USER_LIMIT'))
-            ->get();
+        return $this->model->orderBy('star', 'desc')->get();
+    }
+
+    public function getListUser($id)
+    {
+        return $this->model->where('id', '<>', $id)->orderBy('star', 'desc')->get();
+    }
+
+    public function getTimeline($userId)
+    {
+        return $this->model->with([
+            'timelines' => function ($query) use ($userId) {
+                $query->with(['event', 'blog'])
+                    ->with(['friend' => function ($queryUser) use ($userId) {
+                        $queryUser->where('id', '<>', $userId);
+                    }])
+                    ->with(['campaign' => function ($queryCampaign) {
+                        $queryCampaign->with('image');
+                    }])->orderBy('id', 'desc');
+            },
+        ])->find($userId);
+    }
+
+    public function getListUserFollow($id)
+    {
+        return $this->model->whereNotIn('id', Relationship::where('user_id', '=', $id)
+                ->select('target_id')->get())
+            ->where('id', '<>', $id)
+            ->where('id', '<>', auth()->id())
+            ->inRandomOrder()->get();
     }
 }

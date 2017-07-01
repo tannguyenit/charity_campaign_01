@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
+use App\QueryFilter;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Nicolaslopezj\Searchable\SearchableTrait;
-use App\QueryFilter;
 
 class Campaign extends Model
 {
@@ -74,6 +75,11 @@ class Campaign extends Model
         return $this->hasMany(Contribution::class);
     }
 
+    public function timelines()
+    {
+        return $this->hasMany(Timeline::class);
+    }
+
     public function comments()
     {
         return $this->hasMany(Comment::class);
@@ -129,5 +135,34 @@ class Campaign extends Model
     public function scopeFilter($query, QueryFilter $filters)
     {
         return $filters->apply($query);
+    }
+
+    public function trimName()
+    {
+        return str_limit($this->name, config('constants.LIMIT_TITLE_CHARACTERS'));
+    }
+
+    public function trimDescription()
+    {
+        return str_limit($this->description, config('constants.LIMIT_TITLE_CHARACTERS'));
+    }
+
+    public function timeHours($param)
+    {
+        return date('h:i A', strtotime($this->$param));
+    }
+
+    public function timeDay($param)
+    {
+        return date('D , F d , Y', strtotime($this->$param));
+    }
+
+    public function countTimer($value)
+    {
+        if (empty($value)) {
+            return false;
+        }
+
+        return Carbon::now()->subSeconds(time() - strtotime($this->$value))->diffForHumans();
     }
 }

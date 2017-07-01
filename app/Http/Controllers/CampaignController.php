@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CampaignRequest;
 use App\Models\Campaign;
+use App\Models\CategoryUnit;
 use App\Models\Event;
 use App\Repositories\Campaign\CampaignRepositoryInterface;
 use App\Repositories\Category\CategoryRepositoryInterface;
@@ -11,6 +12,7 @@ use App\Repositories\Contribution\ContributionRepositoryInterface;
 use App\Repositories\Group\GroupRepositoryInterface;
 use App\Repositories\Message\MessageRepositoryInterface;
 use App\Repositories\Rating\RatingRepositoryInterface;
+use App\Repositories\Timeline\TimelineRepositoryInterface;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Services\Purifier;
 use Illuminate\Http\Request;
@@ -26,6 +28,7 @@ class CampaignController extends BaseController
     protected $contributionRepository;
     protected $ratingRepository;
     protected $categoryCampaignRepository;
+    protected $timelineRepository;
     protected $userRepository;
     protected $messageRepository;
     protected $groupRepository;
@@ -38,6 +41,7 @@ class CampaignController extends BaseController
         ContributionRepositoryInterface $contributionRepository,
         RatingRepositoryInterface $ratingRepository,
         UserRepositoryInterface $userRepository,
+        TimelineRepositoryInterface $timelineRepository,
         MessageRepositoryInterface $messageRepository,
         GroupRepositoryInterface $groupRepository
     ) {
@@ -45,6 +49,7 @@ class CampaignController extends BaseController
         $this->campaign = $campaign;
         $this->event = $event;
         $this->categoryRepository = $categoryRepository;
+        $this->timelineRepository = $timelineRepository;
         $this->contributionRepository = $contributionRepository;
         $this->ratingRepository = $ratingRepository;
         $this->userRepository = $userRepository;
@@ -64,6 +69,7 @@ class CampaignController extends BaseController
         $this->dataView['countCampaigns'] = $this->campaign->count();
         $this->dataView['countEvents'] = $this->event->count();
         $this->dataView['countInteractives'] = $this->contributionRepository->getInteractive();
+        $this->dataView['topUser'] = $this->userRepository->getUserByRating()->take(config('constants.TOP_USER'));
 
         return view('campaign.index', $this->dataView);
     }
@@ -75,9 +81,10 @@ class CampaignController extends BaseController
      */
     public function create()
     {
-        $this->dataJson['validateMessage'] = json_encode(trans('campaign.validate'));
+        $this->dataView['validateMessage'] = json_encode(trans('campaign.validate'));
+        $this->dataView['categoryUnit'] = CategoryUnit::all();
 
-        return view('campaign.create', $this->dataJson);
+        return view('campaign.create', $this->dataView);
     }
 
     /**
@@ -108,9 +115,13 @@ class CampaignController extends BaseController
                 ->withMessage(trans('campaign.create_error'));
         }
 
-        return redirect(
-            action('UserController@listUserCampaign', ['id' => auth()->id()])
-        )->with(['alert-success' => trans('campaign.create_success')]);
+        if (!$this->timelineRepository->createTimeline(['campaign_id' => $campaign->id])) {
+            return redirect(action('UserController@listUserCampaign', ['id' => auth()->id()]))
+                ->with(['alert-danger' => trans('timeline.create_error')]);
+        }
+
+        return redirect(action('UserController@listUserCampaign', ['id' => auth()->id()]))
+            ->with(['alert-success' => trans('campaign.create_success')]);
     }
 
     public function showCampaigns()
@@ -118,9 +129,32 @@ class CampaignController extends BaseController
         $this->dataView['campaigns'] = $this->campaignRepository
             ->getAll()
             ->paginate(config('constants.PAGINATE_CAMPAIGN'));
-        $this->dataView['campaign'] = $this->campaignRepository->lastCampaign();
 
         return view('campaign.campaigns', $this->dataView);
+    }
+
+    public function confirmed($id)
+    {
+        $this->dataView['detailCampaign'] = $this->campaignRepository->getDetail($id);
+
+        if (!$this->dataView['detailCampaign']) {
+            return abort(404);
+        }
+        $this->dataView['contributionConfirmed'] = $this->contributionRepository->getUserContributionConfirmed($id);
+
+        return view('campaign.list_contribution_confirmed', $this->dataView);
+    }
+
+    public function unconfirmed($id)
+    {
+        $this->dataView['detailCampaign'] = $this->campaignRepository->getDetail($id);
+
+        if (!$this->dataView['detailCampaign']) {
+            return abort(404);
+        }
+        $this->dataView['contributionUnConfirmed'] = $this->contributionRepository->getUserContributionUnConfirmed($id);
+
+        return view('campaign.list_contribution_unconfirmed', $this->dataView);
     }
 
     /**
@@ -131,9 +165,10 @@ class CampaignController extends BaseController
      */
     public function show($id)
     {
-        $this->dataView['campaign'] = $this->campaignRepository->getDetail($id);
 
-        if (!$this->dataView['campaign']) {
+        $this->dataView['detailCampaign'] = $this->campaignRepository->getDetail($id);
+
+        if (!$this->dataView['detailCampaign']) {
             return abort(404);
         }
 
@@ -146,14 +181,13 @@ class CampaignController extends BaseController
             'campaign_id' => $id,
         ]);
 
-        // get list members of campaign
         $this->dataView['members'] = $this->campaignRepository->getMembers($id);
-        $this->dataView['averageRanking'] = $this->ratingRepository->averageRatingCampaign($this->dataView['campaign']->id);
-        $this->dataView['ratingChart'] = $this->ratingRepository->getRatingChart($id);
-        $this->dataView['averageRankingUser'] = $this->ratingRepository->averageRatingUser($this->dataView['campaign']->owner->user_id);
         $this->dataView['contributionConfirmed'] = $this->contributionRepository->getUserContributionConfirmed($id);
         $this->dataView['contributionUnConfirmed'] = $this->contributionRepository->getUserContributionUnConfirmed($id);
-        $this->dataView['userRatings'] = $this->ratingRepository->listUserRating($this->dataView['campaign']->owner->user_id);
+        $this->dataView['averageRanking'] = $this->ratingRepository->averageRatingCampaign($this->dataView['detailCampaign']->id);
+        $this->dataView['ratingChart'] = $this->ratingRepository->getRatingChart($id);
+        $this->dataView['averageRankingUser'] = $this->ratingRepository->averageRatingUser($this->dataView['detailCampaign']->owner->user_id);
+        $this->dataView['userRatings'] = $this->ratingRepository->listUserRating($this->dataView['detailCampaign']->owner->user_id);
         $groupId = $this->groupRepository->getGroupIdByCampaignId($id);
 
         if ($groupId) {
@@ -162,7 +196,7 @@ class CampaignController extends BaseController
 
         $this->dataView['groupName'] = $this->groupRepository->getGroupNameByCampaignId($id);
 
-        return view('campaign.show', $this->dataView);
+        return view('campaign.detail', $this->dataView);
     }
 
     public function review(Request $request)
@@ -183,9 +217,7 @@ class CampaignController extends BaseController
     public function joinOrLeaveCampaign(Request $request)
     {
         if ($request->ajax()) {
-            $inputs = $request->only([
-                'campaign_id',
-            ]);
+            $inputs = $request->only('campaign_id');
 
             $inputs['user_id'] = auth()->id();
 

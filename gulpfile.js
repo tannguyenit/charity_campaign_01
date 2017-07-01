@@ -7,7 +7,15 @@ elixir(function (mix) {
         'resources/assets/sass/common.scss',
         'resources/assets/sass/custom.scss'
     ], 'public/css/');
-
+    mix.sass([
+        'resources/assets/sass/master.scss',
+    ], 'public/css/master.css');
+    mix.sass([
+        'resources/assets/sass/chat.scss',
+    ], 'public/css/chatbox.css');
+    mix.sass([
+        'resources/assets/sass/messenger.scss',
+    ], 'public/css/messenger.css');
     mix.copy('resources/assets/css', 'public/css');
     mix.copy('resources/assets/img', 'public/img');
     mix.copy('resources/assets/js', 'public/js');
@@ -18,4 +26,10 @@ elixir(function (mix) {
         'resources/assets/css/themes.css',
         'resources/assets/css/chat.css'
     ], 'public/css/templates.css');
+    mix.styles([
+        'resources/assets/css/profile_00.css',
+        'resources/assets/css/profile_01.css',
+        'resources/assets/css/profile_02.css',
+        'resources/assets/css/profile_03.css'
+    ], 'public/css/user_profile.css');
 });

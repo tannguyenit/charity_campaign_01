@@ -1,16 +1,15 @@
 <?php
 namespace App\Repositories\Follow;
 
-use Auth;
 use App\Models\Relationship;
 use App\Repositories\BaseRepository;
 use App\Repositories\Follow\FollowRepositoryInterface;
-use DB;
+use Auth;
 
 class FollowRepository extends BaseRepository implements FollowRepositoryInterface
 {
 
-    function model()
+    public function model()
     {
         return Relationship::class;
     }
@@ -59,8 +58,7 @@ class FollowRepository extends BaseRepository implements FollowRepositoryInterfa
         return $this->model->where('user_id', $userId)
             ->where('target_type', config('constants.FOLLOW_USER'))
             ->where('status', config('constants.ACTIVATED'))
-            ->with('following')
-            ->get();
+            ->with('following');
     }
 
     public function followers($userId)
@@ -72,7 +70,27 @@ class FollowRepository extends BaseRepository implements FollowRepositoryInterfa
         return $this->model->where('target_id', $userId)
             ->where('target_type', config('constants.FOLLOW_USER'))
             ->where('status', config('constants.ACTIVATED'))
-            ->with('follower')
-            ->get();
+            ->with('follower');
+    }
+
+    public function searchUserFollowing($keyWords, $arrId)
+    {
+
+        $users = $this->model->where('user_id', auth()->id())
+            ->where('target_type', config('constants.FOLLOW_USER'))
+            ->where('status', config('constants.ACTIVATED'))
+            ->with(['following' => function ($query) use ($keyWords, $arrId) {
+                $query->where('fullname', 'LIKE', '%' . $keyWords . '%')->whereNotIn('id', $arrId);
+            }])->get();
+
+        $result = [];
+        foreach ($users as $user) {
+            $result[] = [
+                'html' => view('messenger.search_result', ['user' => $user])->render(),
+                'success' => true,
+            ];
+        }
+
+        return $result;
     }
 }

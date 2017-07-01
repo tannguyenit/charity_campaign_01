@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'ZERO' => 0,
+    'ONE' => 1,
     'NOT_ACTIVE' => 0,
     'ACTIVATED' => 1,
     'AVATAR' => 'AVATAR',
@@ -13,6 +15,7 @@ return [
     'TWO_STAR' => 2,
     'THREE_STAR' => 3,
     'FOUR_STAR' => 4,
+    'TOP_USER' => 4,
     'FIVE_STAR' => 5,
     'ROUND_CHART' => 2,
     'EMPTY_DATA' => 0,
@@ -24,8 +27,10 @@ return [
     ],
     'PAGINATE_CAMPAIGN' => 12,
     'USER_LIMIT' => 8,
-    'LIMIT_TITLE_CHARACTERS' => 50,
-    'LIMIT_DESCRIPTION_CHARACTERS' => 135,
+    'ALL_USER_LIMIT' => 16,
+    'LIMIT_TITLE_CHARACTERS' => 20,
+    'LIMIT_DESCRIPTION_CHARACTERS' => 55,
     'INDEX_CAMPAIGNS' => 3,
+    'LIMIT_EVENT' => 9,
     'PHONE' => '+84 4 3795 5417',
 ];

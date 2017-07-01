@@ -58,11 +58,33 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::resource('user', 'UserController');
 
+    Route::get('user/{userId}/follower', 'UserController@follower');
+
+    Route::get('user/{userId}/following', 'UserController@following');
+
     Route::get('campaigns/create', 'CampaignController@create');
+
+    Route::get('campaigns/{id}/event-create', 'EventController@eventCreate');
+
+    Route::post('event/create', 'EventController@store');
+
+    Route::get('blog/create', 'OrtherController@createBlog');
+
+    Route::post('blog/create', 'OrtherController@saveBlog');
 
     Route::post('campaigns/create', 'CampaignController@store');
 
+    Route::post('campaigns/update', 'CampaignController@update');
+
+    Route::resource('event', 'EventController');
+
     Route::get('user/{userId}/campaigns', 'UserController@listUserCampaign');
+
+    Route::get('user/{userId}/event', 'UserController@listUserEvent');
+
+    Route::get('user/{userId}/blog', 'UserController@listUserBlog');
+
+    Route::delete('blog/{blogId}', 'OrtherController@deleteBlog');
 
     Route::get('user/{userId}/campaigns/{campaignId}', 'UserController@manageCampaign');
 
@@ -79,6 +101,12 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('campaign/uploadImage', 'CampaignController@uploadImage');
 
     Route::post('follow/user', 'FollowController@followOrUnFollowUser');
+
+    Route::get('messages/search', 'MessagesController@searchUser');
+
+    Route::resource('messages', 'MessagesController');
+
+    Route::resource('participant', 'ParticipantController');
 });
 
 Route::get('campaigns', 'CampaignController@showCampaigns');
@@ -89,13 +117,20 @@ Route::get('aboutUs', 'OrtherController@aboutUs');
 
 Route::get('faq', 'OrtherController@faq');
 
+Route::get('member', 'OrtherController@member');
+
+Route::get('blog', 'OrtherController@blog');
+
 Route::get('contact', 'OrtherController@contact');
+
+Route::post('contact', 'OrtherController@store');
 
 Route::post('review', 'CampaignController@review');
 
-Route::post('blog', 'BlogController@index');
-
 Route::get('campaigns/{id}', 'CampaignController@show');
+
+Route::get('confirmed/{id}', 'CampaignController@confirmed');
+Route::get('unconfirmed/{id}', 'CampaignController@unconfirmed');
 
 Route::resource('contribution', 'ContributionController');
 
@@ -105,7 +140,11 @@ Route::post('request-join', 'CampaignController@joinOrLeaveCampaign');
 
 Route::get('campaign/search', 'CampaignController@searchCampaign');
 
-Route::resource('event', 'EventController');
+Route::get('event', 'EventController@index');
+
+Route::get('event-search', 'EventController@search');
+
+Route::get('event/{eventId}', 'EventController@show');
 
 Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'as' => 'admin.', 'middleware' => 'admin'], function () {
     Route::resource('user', 'UserController', [
@@ -113,4 +152,10 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin', 'as' => 'admin.', 'mi
     ]);
 
     Route::resource('campaign', 'CampaignController');
+
+    Route::resource('contact', 'ContactController');
+
+    Route::get('contact-sent', 'ContactController@showSent');
+
+    Route::post('delete', 'ContactController@delAll');
 });

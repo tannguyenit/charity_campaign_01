@@ -20,6 +20,7 @@ return [
     ],
     'please' => 'Vui lòng',
     'or' => 'hoặc',
+    'to' => 'Gửi: ',
     'have_account' => 'Bạn chưa có tài khoản',
     'company' => [
         'address' => 'Tầng 13, Keangnam Landmark 72, Đường Phạm Hùng, Nam Từ Liêm, Hà Nội, Việt Nam',

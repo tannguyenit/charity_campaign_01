@@ -2,43 +2,53 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\User;
-use App\Repositories\User\UserRepositoryInterface;
-use Auth;
-use App\Repositories\Campaign\CampaignRepositoryInterface;
-use App\Models\Campaign;
-use App\Repositories\Contribution\ContributionRepositoryInterface;
-use App\Repositories\Rating\RatingRepositoryInterface;
-use App\Repositories\Follow\FollowRepositoryInterface;
 use App\Repositories\Action\ActionRepositoryInterface;
+use App\Repositories\Blog\BlogRepositoryInterface;
+use App\Repositories\Campaign\CampaignRepositoryInterface;
+use App\Repositories\Contribution\ContributionRepositoryInterface;
+use App\Repositories\Event\EventRepositoryInterface;
+use App\Repositories\Follow\FollowRepositoryInterface;
+use App\Repositories\Rating\RatingRepositoryInterface;
+use App\Repositories\Timeline\TimelineRepositoryInterface;
+use App\Repositories\User\UserRepositoryInterface;
+use Illuminate\Http\Request;
 
 class UserController extends BaseController
 {
     protected $user;
     protected $userRepository;
+    protected $timelineRepository;
     protected $campaignRepository;
     protected $contributionRepository;
     protected $ratingRepository;
     protected $followRepository;
     protected $actionRepository;
+    protected $eventRepository;
+    protected $blogRepository;
 
     public function __construct(
         User $user,
         UserRepositoryInterface $userRepository,
+        TimelineRepositoryInterface $timelineRepository,
         CampaignRepositoryInterface $campaignRepository,
         ContributionRepositoryInterface $contributionRepository,
         RatingRepositoryInterface $ratingRepository,
         FollowRepositoryInterface $followRepository,
-        ActionRepositoryInterface $actionRepository
+        ActionRepositoryInterface $actionRepository,
+        EventRepositoryInterface $eventRepository,
+        BlogRepositoryInterface $blogRepository
     ) {
         $this->user = $user;
+        $this->eventRepository = $eventRepository;
         $this->userRepository = $userRepository;
+        $this->timelineRepository = $timelineRepository;
         $this->campaignRepository = $campaignRepository;
         $this->contributionRepository = $contributionRepository;
         $this->ratingRepository = $ratingRepository;
         $this->followRepository = $followRepository;
         $this->actionRepository = $actionRepository;
+        $this->blogRepository = $blogRepository;
     }
 
     /**
@@ -49,6 +59,7 @@ class UserController extends BaseController
      */
     public function show($id)
     {
+
         try {
             $this->dataView['user'] = $this->user->findOrFail($id);
         } catch (ModelNotFoundException $e) {
@@ -59,11 +70,10 @@ class UserController extends BaseController
         $this->dataView['averageRankingUser'] = $this->ratingRepository->averageRatingUser($this->dataView['user']->id);
         $this->dataView['actions'] = $this->actionRepository->getActionByUser($id);
         $this->dataView['countCampaign'] = $this->campaignRepository->countCampaign($id);
-        $this->dataView['following'] = $this->followRepository->following($id);
-        $this->dataView['followers'] = $this->followRepository->followers($id);
         $this->dataView['campaigns'] = $this->campaignRepository->listCampaignOfUser($id)->get();
+        $this->dataView['userList'] = $this->userRepository->getListUserFollow($id);
 
-        return view('user.show', $this->dataView);
+        return view('user.detail', $this->dataView);
     }
 
     /**
@@ -86,8 +96,6 @@ class UserController extends BaseController
 
         $this->dataView['averageRankingUser'] = $this->ratingRepository->averageRatingUser($this->dataView['user']->id);
         $this->dataView['countCampaign'] = $this->campaignRepository->countCampaign($id);
-        $this->dataView['following'] = $this->followRepository->following($id);
-        $this->dataView['followers'] = $this->followRepository->followers($id);
         $this->dataView['campaigns'] = $this->campaignRepository->listCampaignOfUser($id)->get();
 
         return view('user.detail', $this->dataView);
@@ -116,12 +124,19 @@ class UserController extends BaseController
 
         $params = [
             'id' => $user->id,
-            'name' => $user->name = $request->get('name'),
+            'name' => $request->get('name'),
+            'fullname' => $request->get('fullname'),
+            'address' => $request->get('address'),
+            'birthday' => $request->get('birthday'),
+            'phone_number' => $request->get('phone_number'),
             'email' => $request->get('email'),
-            'password' => bcrypt($request->get('password')),
-            'avatar' => $request->file('avatar')
+            'avatar' => $request->file('avatar'),
+            'cover' => $request->file('cover'),
         ];
 
+        if ($request->get('password') != '') {
+            $params['password'] = bcrypt($request->get('password'));
+        }
         // update user
         $user = $this->userRepository->updateProfile($params, $id);
 
@@ -133,7 +148,6 @@ class UserController extends BaseController
 
         return redirect()->back()
             ->with(['alert-success' => trans('user.update_success')]);
-
     }
 
     public function listUserCampaign($id)
@@ -146,10 +160,9 @@ class UserController extends BaseController
 
         $this->dataView['averageRankingUser'] = $this->ratingRepository->averageRatingUser($this->dataView['user']->id);
         $this->dataView['campaigns'] = $this->campaignRepository->listCampaignOfUser($id)
-            ->paginate(config('constants.PAGINATE_CAMPAIGN'));;
+            ->paginate(config('constants.PAGINATE_CAMPAIGN'));
         $this->dataView['countCampaign'] = $this->campaignRepository->countCampaign($id);
-        $this->dataView['following'] = $this->followRepository->following($id);
-        $this->dataView['followers'] = $this->followRepository->followers($id);
+        $this->dataView['userList'] = $this->userRepository->getListUser($id)->take(config('constants.ALL_USER_LIMIT'));
 
         return view('user.campaigns', $this->dataView);
     }
@@ -162,17 +175,72 @@ class UserController extends BaseController
             return abort(404);
         }
 
-        $this->dataView['campaign'] = $this->campaignRepository->getDetail($campaignId);
+        $this->dataView['campaignInfo'] = $this->campaignRepository->getInfoCampaign($campaignId);
         $this->dataView['averageRankingUser'] = $this->ratingRepository->averageRatingUser($this->dataView['user']->id);
         $this->dataView['campaignUsers'] = $this->userRepository->getUsersInCampaign($campaignId)
             ->paginate(config('constants.PAGINATE'));
         $this->dataView['contributions'] = $this->contributionRepository->getAllCampaignContributions($campaignId)
             ->paginate(config('constants.PAGINATE'));
         $this->dataView['countCampaign'] = $this->campaignRepository->countCampaign($id);
-        $this->dataView['following'] = $this->followRepository->following($id);
-        $this->dataView['followers'] = $this->followRepository->followers($id);
         $this->dataView['campaigns'] = $this->campaignRepository->listCampaignOfUser($id)->get();
 
         return view('user.campaign_detail', $this->dataView);
+    }
+
+    public function follower($id)
+    {
+        try {
+            $this->dataView['user'] = $this->user->findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            return abort(404);
+        }
+
+        $this->dataView['averageRankingUser'] = $this->ratingRepository->averageRatingUser($this->dataView['user']->id);
+        $this->dataView['countCampaign'] = $this->campaignRepository->countCampaign($id);
+
+        return view('user.follower', $this->dataView);
+    }
+
+    public function following($id)
+    {
+        try {
+            $this->dataView['user'] = $this->user->findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            return abort(404);
+        }
+
+        $this->dataView['averageRankingUser'] = $this->ratingRepository->averageRatingUser($this->dataView['user']->id);
+        $this->dataView['countCampaign'] = $this->campaignRepository->countCampaign($id);
+
+        return view('user.following', $this->dataView);
+    }
+
+    public function listUserEvent($id)
+    {
+        try {
+            $this->dataView['user'] = $this->user->findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            return abort(404);
+        }
+
+        $this->dataView['averageRankingUser'] = $this->ratingRepository->averageRatingUser($this->dataView['user']->id);
+        $this->dataView['listEvent'] = $this->eventRepository->listEventOfUser($id)->paginate(config('constants.PAGINATE'));
+        $this->dataView['userList'] = $this->userRepository->getListUser($id)->take(config('constants.ALL_USER_LIMIT'));
+
+        return view('user.event', $this->dataView);
+    }
+
+    public function listUserBlog($id)
+    {
+        try {
+            $this->dataView['user'] = $this->user->findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            return abort(404);
+        }
+        $this->dataView['averageRankingUser'] = $this->ratingRepository->averageRatingUser($this->dataView['user']->id);
+        $this->dataView['listBlog'] = $this->blogRepository->listBlogOfUser($id)->paginate(config('constants.PAGINATE'));
+        $this->dataView['userList'] = $this->userRepository->getListUser($id)->take(config('constants.ALL_USER_LIMIT'));
+
+        return view('user.blog', $this->dataView);
     }
 }

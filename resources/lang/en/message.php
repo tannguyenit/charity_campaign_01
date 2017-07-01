@@ -20,6 +20,7 @@ return [
     ],
     'please' => 'Please',
     'or' => 'or',
+    'to' => 'To : ',
     'have_account' => 'Do you have an account?',
     'company' => [
         'address' => 'Tầng 13, Keangnam Landmark 72, Đường Phạm Hùng, Nam Từ Liêm, Hà Nội, Việt Nam',

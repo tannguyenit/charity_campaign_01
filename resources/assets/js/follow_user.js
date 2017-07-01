@@ -12,13 +12,13 @@ Follow.prototype = {
 
     followOrUnFollowUser: function () {
         var _self = this;
-        var icon = '<i class="fa fa-users"></i> ';
-
-        $(".follow").click(function(e) {
+        var icon = '<i class="fa fa-user-plus"></i> ';
+        $(document).on('click', '.follow', function(e) {
             e.preventDefault();
             var thisButton = this;
             var divChangeAmount = $(this).parent();
             var userId = divChangeAmount.data('userId');
+            var size = divChangeAmount.data('size');
             var token = $('.hide').data('token');
 
             $.ajax({
@@ -31,14 +31,22 @@ Follow.prototype = {
                 success: function(data)
                 {
                     if (data.result.status) {
-                        $(thisButton).text(_self.btnUnFollow).prepend(icon);
-                        $(thisButton).attr('class', 'btn btn-raised btn-success follow');
+                        if ($(thisButton).parent().hasClass('user-actions-follow-button')) {
+                            $(thisButton).closest('.UserSmallListItem').fadeOut();
+                        }
+                        var html = ''
+                        html += '<button type="button" class="EdgeButton EdgeButton--primary EdgeButton--'+size+' button-text following-text follow">Following</button>'
+                        html += '<button type="button" class="EdgeButton EdgeButton--danger EdgeButton--'+size+' button-text unfollow-text follow">Unfollow</button>'
+
+                        $(thisButton).parent().html(html);
+                        $(thisButton).hide();
                     } else {
                         $(thisButton).text(_self.btnFollow).prepend(icon);
-                        $(thisButton).attr('class', 'btn active btn-default follow');
+                        $(thisButton).parent().find('.following-text').hide()
+                        $(thisButton).attr('class', 'EdgeButton EdgeButton--secondary EdgeButton--'+size+' follow-text follow');
                     }
                 }
             });
-        });
+        })
     }
 };
